@@ -26,31 +26,6 @@
 ✅ PgBouncer         - Connection Pooling
 ```
 
-### ✅ 3. مبادئ SOLID & Low Coupling
-
-```mermaid
-graph TB
-    A[CmsController] -->|يعتمد على| B[ICmsOperations<br/>واجهة]
-    C[DiscoveryController] -->|يعتمد على| D[IDiscoveryOperations<br/>واجهة]
-    
-    B -.تنفذها.-> E[CmsOperationsService]
-    D -.تنفذها.-> F[DiscoveryService]
-    
-    E --> G[ICmsRepository<br/>واجهة]
-    F --> H[IDiscoveryRepository<br/>واجهة]
-    
-    style A fill:#ffe1e1
-    style C fill:#e1ffe1
-    style B fill:#e1f5ff
-    style D fill:#e1f5ff
-```
-
-**التطبيق:**
-- ✅ **Single Responsibility:** كل service له مسؤولية واحدة
-- ✅ **Interface Segregation:** Controllers تعتمد على واجهات محددة
-- ✅ **Dependency Inversion:** التبعية على التجريدات، ليس التطبيقات
-- ✅ **Low Coupling:** Repository pattern + Strategy pattern
-- ✅ **Module Boundaries:** Monorepo مع libs/core مشتركة
 ## 🚀 التشغيل السريع (3 خطوات)
 
 ### المتطلبات
@@ -114,36 +89,6 @@ curl "http://localhost:3002/programs?page=1&sort=newest&limit=20"
 # الحصول على برامج مشابهة
 curl "http://localhost:3002/programs/{ID}/related?limit=5"
 ```
-
----
-
-## 🏗️ معمارية النظام
-
-```mermaid
-graph TB
-    A[Monorepo]
-    
-    A --> B[CMS API :3001<br/>إدارة المحتوى]
-    A --> C[Discovery API :3002<br/>الاستكشاف العام]
-    
-    B --> D[libs/core<br/>Shared Logic]
-    C --> D
-    
-    D --> E[PostgreSQL<br/>+ PgBouncer]
-    
-    style A fill:#e1f5ff
-    style B fill:#ffe1e1
-    style C fill:#e1ffe1
-    style D fill:#fff4e1
-    style E fill:#f0e1ff
-```
-
-**الفصل الواضح:**
-- **CMS (Write):** عمليات الإدارة، تعديل المحتوى، النشر
-- **Discovery (Read):** البحث، الاستكشاف، عرض التفاصيل
-- **libs/core:** Entities، Services، DTOs مشتركة
-
----
 
 ## 🛠️ هيكل المشروع
 
