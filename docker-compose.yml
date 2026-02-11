@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: thamanya_postgres
+    environment:
+      POSTGRES_USER: thamanya_user
+      POSTGRES_PASSWORD: thamanya_password
+      POSTGRES_DB: thamanya_db
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/init.sql:/docker-entrypoint-initdb.d/01-init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U thamanya_user -d thamanya_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - thamanya_network
+
+  pgbouncer:
+    image: edoburu/pgbouncer:latest
+    container_name: thamanya_pgbouncer
+    environment:
+      DATABASE_URL: "postgres://thamanya_user:thamanya_password@postgres:5432/thamanya_db"
+      POOL_MODE: "transaction"
+      MAX_CLIENT_CONN: 1000
+      DEFAULT_POOL_SIZE: 20
+      MIN_POOL_SIZE: 5
+      AUTH_TYPE: "scram-sha-256"
+      RESERVE_POOL_SIZE: 5
+      RESERVE_POOL_TIMEOUT: 3
+    ports:
+      - "6432:5432"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - thamanya_network
+
+volumes:
+  postgres_data:
+
+networks:
+  thamanya_network:
+    driver: bridge

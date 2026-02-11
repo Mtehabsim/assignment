@@ -1,0 +1,37 @@
+{
+  "monorepo": true,
+  "root": ".",
+  "sourceRoot": "apps/cms/src",
+  "compilerOptions": {
+    "webpack": true
+  },
+  "projects": {
+    "cms": {
+      "type": "application",
+      "root": "apps/cms",
+      "entryFile": "main",
+      "sourceRoot": "apps/cms/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/cms/tsconfig.app.json"
+      }
+    },
+    "discovery": {
+      "type": "application",
+      "root": "apps/discovery",
+      "entryFile": "main",
+      "sourceRoot": "apps/discovery/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/discovery/tsconfig.app.json"
+      }
+    },
+    "core": {
+      "type": "library",
+      "root": "libs/core",
+      "entryFile": "index",
+      "sourceRoot": "libs/core/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/core/tsconfig.lib.json"
+      }
+    }
+  }
+}
