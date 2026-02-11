@@ -25,7 +25,7 @@ export interface YouTubeMetadata {
 
 /**
  * Union type for all supported provider metadata
- * Extensible for future providers (Vimeo, Twitch, etc.)
+ * Extensible for future providers (YT, Twitch, etc.)
  */
 export type ProviderMetadata = YouTubeMetadata | Record<string, unknown>;
 

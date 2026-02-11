@@ -21,7 +21,7 @@ import {
 import { ThrottlerGuard } from "@nestjs/throttler";
 import { ICmsOperations, PAGINATION } from "@app/core";
 import {
-  UpdateProgramDto,
+  CmsUpdateProgramDto,
   SearchExternalDto,
   ImportProgramDto,
 } from "@app/cms";
@@ -97,7 +97,7 @@ export class CmsController {
   @Patch(":id")
   async updateProgram(
     @Param("id") id: string,
-    @Body() updateDto: UpdateProgramDto,
+    @Body() updateDto: CmsUpdateProgramDto,
   ) {
     return this.cmsOperations.updateProgram(id, updateDto);
   }

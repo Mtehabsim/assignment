@@ -50,4 +50,19 @@ export abstract class BaseProgramsRepository {
       where: { id, status: ProgramStatus.PUBLISHED, deleted_at: IsNull() },
     });
   }
+
+  async findLatestSlugPattern(baseSlug: string): Promise<string | null> {
+    const regexPattern = `^${baseSlug}-[0-9]+$`;
+
+    const result = await this.typeOrmRepository
+      .createQueryBuilder("p")
+      .select("p.slug")
+      .where("p.slug ~ :pattern", { pattern: regexPattern })
+      .orderBy("LENGTH(p.slug)", "DESC")
+      .addOrderBy("p.slug", "DESC")
+      .limit(1)
+      .getOne();
+
+    return result ? result.slug : null;
+  }
 }

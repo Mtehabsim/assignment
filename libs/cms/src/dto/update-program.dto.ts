@@ -1,23 +1,9 @@
-import { IsString, IsOptional, IsNumber, IsEnum } from "class-validator";
+import { IsString, IsOptional, IsEnum } from "class-validator";
+import { UpdateProgramDto as CoreUpdateDto } from "@app/core";
 import { ProgramCategory } from "@app/core";
 
-export class UpdateProgramDto {
-  @IsOptional()
-  @IsString()
-  title?: string;
-
-  @IsOptional()
-  @IsString()
-  description?: string;
-
-  @IsOptional()
-  @IsString()
-  slug?: string;
-
-  @IsOptional()
-  @IsNumber()
-  duration_seconds?: number;
-
+export class CmsUpdateProgramDto extends CoreUpdateDto {
+  
   @IsOptional()
   @IsEnum(ProgramCategory)
   category?: ProgramCategory;

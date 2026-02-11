@@ -26,51 +26,7 @@
 ✅ PgBouncer         - Connection Pooling
 ```
 
-### ✅ 3. التوسع (Scalability: 10M Users/Hour)
-
-```mermaid
-graph LR
-    A[10M/hour<br/>2777 RPS] --> B[CDN<br/>99% cache]
-    B --> C[Load Balancer]
-    C --> D[100+ Discovery<br/>instances]
-    C --> E[1-5 CMS<br/>instances]
-    D --> F[PgBouncer<br/>20 connections]
-    E --> F
-    F --> G[PostgreSQL]
-```
-
-**الاستراتيجية:**
-- 🌐 **CDN Caching:** 99% من الطلبات لا تصل للخادم
-- 🔄 **PgBouncer:** 1000 عميل → 20 اتصال DB
-- 📈 **Horizontal Scaling:** توسع أفقي للـ Discovery
-- ⚡ **Async Operations:** View counting بدون إعاقة
-
-### ✅ 4. قاعدة البيانات والبحث (Database & Search)
-
-**الاختيار:** PostgreSQL مع TSVECTOR
-
-**لماذا PostgreSQL؟**
-- ✅ بحث نصي كامل بزمن <5ms (بدون Elasticsearch)
-- ✅ ACID transactions
-- ✅ تحديث تلقائي لفهرس البحث (Database Triggers)
-- ✅ دعم اللغة العربية في البحث
-
-**تصميم الجداول:**
-```sql
--- Unique constraint لمنع التكرار
-CREATE UNIQUE INDEX idx_unique_import 
-  ON programs(source_provider, external_id);
-
--- GIN index للبحث السريع
-CREATE INDEX idx_search ON programs USING GIN(search_vector);
-
--- Auto-update trigger
-CREATE TRIGGER tsvectorupdate 
-  BEFORE INSERT OR UPDATE ON programs
-  FOR EACH ROW EXECUTE PROCEDURE programs_search_trigger();
-```
-
-### ✅ 5. مبادئ SOLID & Low Coupling
+### ✅ 3. مبادئ SOLID & Low Coupling
 
 ```mermaid
 graph TB
@@ -95,33 +51,6 @@ graph TB
 - ✅ **Dependency Inversion:** التبعية على التجريدات، ليس التطبيقات
 - ✅ **Low Coupling:** Repository pattern + Strategy pattern
 - ✅ **Module Boundaries:** Monorepo مع libs/core مشتركة
-
-**مثال:**
-```typescript
-// Controller يعتمد على واجهة، ليس تطبيق
-@Controller()
-export class CmsController {
-  constructor(
-    @Inject('ICmsOperations') 
-    private readonly cmsOperations: ICmsOperations
-  ) {}
-}
-```
-
-### ✅ 6. المستند التقني (Technical Documentation)
-
-📄 **المستند الكامل:** [TECHNICAL_ARCHITECTURE_DOCUMENT.md](./TECHNICAL_ARCHITECTURE_DOCUMENT.md)
-
-يشمل:
-- ✅ طريقة الحل والمعمارية
-- ✅ 8 تحديات رئيسية مع الحلول
-- ✅ البدائل المدروسة (Elasticsearch، Redis، DynamoDB)
-- ✅ الاقتراحات المستقبلية (5 مراحل)
-- ✅ مقاييس الأداء
-- ✅ مخططات Mermaid
-
----
-
 ## 🚀 التشغيل السريع (3 خطوات)
 
 ### المتطلبات
@@ -133,7 +62,7 @@ export class CmsController {
 
 ```bash
 # 1. تثبيت التبعيات
-npm install
+npm install && npm run build
 
 # 2. تشغيل قاعدة البيانات
 npm run docker:up
@@ -142,10 +71,6 @@ npm run docker:up
 npm run start:cms        # Terminal 1 - Port 3001
 npm run start:discovery  # Terminal 2 - Port 3002
 ```
-
-✅ **جاهز للاستخدام!**
-
----
 
 ## 📡 أمثلة API
 
@@ -220,53 +145,6 @@ graph TB
 
 ---
 
-## 🔍 الميزات الرئيسية
-
-### البحث النصي الكامل
-- ⚡ زمن استجابة <5ms
-- 🔤 دعم اللغة العربية
-- 🎯 GIN index + TSVECTOR
-
-### تكامل YouTube حقيقي
-- 📺 Google YouTube Data API v3
-- 🔄 Parser لتحويل ISO 8601 duration
-- 🎨 جلب الصور المصغرة والبيانات الوصفية
-
-### الأداء العالي
-- 📊 99% cache hit ratio عند CDN
-- 🔄 Connection pooling (1000 → 20)
-- ⚡ Async view counting
-
-### جودة الكود
-- ✅ 100% TypeScript type-safe
-- ✅ Zero `any` types
-- ✅ SOLID principles
-- ✅ Interface-based design
-
----
-
-## 📚 المستندات التفصيلية
-
-| المستند | المحتوى |
-|---------|---------|
-| [TECHNICAL_ARCHITECTURE_DOCUMENT.md](./TECHNICAL_ARCHITECTURE_DOCUMENT.md) | المعمارية الكاملة، التحديات، الحلول، البدائل |
-| [API_SPECIFICATION.md](./API_SPECIFICATION.md) | توثيق كامل لجميع الـ 12 endpoint |
-
----
-
-## 🧪 الاختبار
-
-```bash
-# Build
-npm run build
-
-# اختبار endpoint بسيط
-curl http://localhost:3001/admin/programs
-curl http://localhost:3002/programs
-```
-
----
-
 ## 🛠️ هيكل المشروع
 
 ```
@@ -300,154 +178,6 @@ YOUTUBE_CHANNEL_ID=UCF2JlBUzfP2lqhI0P-vFEKA
 ```
 
 ---
-
-## 📊 مقاييس الأداء
-
-| المقياس | الهدف | المحقق |
-|---------|--------|--------|
-| زمن البحث | <100ms | **<5ms** ✅ |
-| زمن الصفحة الرئيسية | <100ms | **<50ms** ✅ |
-| اتصالات DB | <100 | **20** ✅ |
-
-**ملاحظة:** مقاييس الأداء الفعلية تحتاج إلى Load Testing حقيقي لقياسها.
-
----
-
-## 🎓 القرارات التقنية الرئيسية
-
-### لماذا PostgreSQL بدلاً من DynamoDB؟
-- ✅ TSVECTOR للبحث النصي الكامل
-- ✅ ACID transactions
-- ✅ تكلفة متوقعة عند التوسع
-
-### لماذا Monorepo؟
-- ✅ مشاركة الـ Types بين CMS و Discovery
-- ✅ توسع مستقل للتطبيقات
-- ✅ فصل واضح بين Read و Write operations
-
-### لماذا CDN بدلاً من Redis؟
-- ✅ 99% cache hit عند الحافة (0ms للمستخدمين)
-- ✅ بدون تعقيد إضافي
-- ✅ Automatic stale-while-revalidate
-
----
-
-## 🏛️ المعمارية (Architecture)
-
-```mermaid
-graph TB
-    subgraph "Client Layer"
-        U[Users<br/>10M/hour]
-    end
-    
-    subgraph "CDN Layer"
-        CDN[CloudFront/Cloudflare<br/>99% Cache Hit]
-    end
-    
-    subgraph "Application Layer"
-        LB[Load Balancer]
-        CMS[CMS API :3001<br/>1-5 instances]
-        DISC[Discovery API :3002<br/>100+ instances]
-    end
-    
-    subgraph "Data Layer"
-        PGB[PgBouncer<br/>20 connections]
-        DB[(PostgreSQL<br/>TSVECTOR Search)]
-    end
-    
-    U --> CDN
-    CDN --> LB
-    LB --> CMS
-    LB --> DISC
-    CMS --> PGB
-    DISC --> PGB
-    PGB --> DB
-    
-    style U fill:#ffe1e1
-    style CDN fill:#e1ffe1
-    style CMS fill:#fff4e1
-    style DISC fill:#fff4e1
-    style PGB fill:#f0e1ff
-    style DB fill:#f0e1ff
-```
-
----
-
-## 💡 الميزات التقنية
-
-### 1. البحث الذكي
-- دعم كامل للغة العربية
-- Typo tolerance مع trigram index
-- Auto-update search vectors
-
-### 2. تكامل حقيقي مع YouTube
-- Google YouTube Data API v3
-- Parser لـ ISO 8601 duration (PT1H30M → 5400 seconds)
-- جلب تلقائي للبيانات الوصفية
-
-### 3. Idempotent Operations
-- استيراد نفس الفيديو مرتين يُرجع السجل الموجود
-- منع التكرار بـ UNIQUE constraint
-
-### 4. Type Safety
-- صفر `any` types
-- Generic interfaces
-- Strict TypeScript
-
----
-
-## 🔐 الأمان والأداء
-
-### Rate Limiting
-```typescript
-ThrottlerModule.forRoot([{
-  ttl: 60000,  // 60 seconds
-  limit: 1000  // 1000 requests
-}])
-```
-
-### Structured Logging
-```typescript
-private readonly logger = new Logger(ServiceName.name);
-this.logger.log('Operation started');
-this.logger.error('Operation failed', error);
-```
-
-### HTTP Caching
-```typescript
-@Header('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300')
-```
-
----
-
-## 🧩 SOLID Principles في الممارسة
-
-### Interface Segregation
-```typescript
-// واجهات منفصلة لكل مجموعة عمليات
-interface ICmsOperations {
-  searchExternal(...): Promise<SearchResult[]>
-  importProgram(...): Promise<Program>
-  updateProgram(...): Promise<Program>
-}
-
-interface IDiscoveryOperations {
-  search(...): Promise<{ data: Program[]; total: number }>
-  findHomeFeed(...): Promise<{ data: Program[]; total: number }>
-}
-```
-
-### Dependency Inversion
-```typescript
-// Controllers تعتمد على واجهات، ليس تطبيقات
-constructor(
-  @Inject('ICmsOperations') 
-  private readonly cmsOperations: ICmsOperations
-) {}
-```
-
----
-
 ## 📖 أوامر مفيدة
 
 ```bash
@@ -467,103 +197,3 @@ npm run docker:logs        # View logs
 npm run start:prod:cms
 npm run start:prod:discovery
 ```
-
----
-
-## 🎯 الحالة الحالية vs المقترحات المستقبلية
-
-### ✅ ما هو مُطبَّق فعلياً (Current Implementation)
-
-| الميزة | الحالة | التفاصيل |
-|--------|--------|----------|
-| PostgreSQL + TSVECTOR | ✅ مطبق | بحث نصي كامل مع دعم العربية |
-| PgBouncer | ✅ مطبق | Connection pooling (محلي للتطوير) |
-| NestJS Monorepo | ✅ مطبق | تطبيقان منفصلان (CMS + Discovery) |
-| TypeScript Strict | ✅ مطبق | Type safety كامل |
-| YouTube Integration | ✅ مطبق | تكامل حقيقي مع YouTube API v3 |
-| Cache-Control Headers | ✅ مطبق | للاستفادة من CDN |
-| Rate Limiting | ✅ مطبق | CMS: 1000/min، Discovery: 100/min مع ThrottlerGuard |
-| Soft Deletes | ✅ مطبق | deleted_at timestamp |
-| Idempotency | ✅ مطبق | UNIQUE constraint على external_id |
-| SOLID Principles | ✅ مطبق | واجهات، Repository pattern |
-| Category Field | ✅ مطبق | تصنيف البرامج (PODCAST، DOCUMENTARY، إلخ) |
-| Unit Tests | ✅ جزئي | 14 tests للـ SlugGenerator utility |
-
-### ⏭️ مقترحات مستقبلية (غير مطبقة حالياً)
-
-| الميزة | الحالة | الأولوية |
-|--------|--------|----------|
-| Redis Caching | ❌ غير مطبق | عالية |
-| JWT Authentication للـ CMS | ❌ غير مطبق | عالية |
-| Structured Logging (Winston/Pino) | ❌ غير مطبق | متوسطة |
-| Queue System (BullMQ) | ❌ غير مطبق | متوسطة |
-| E2E Tests Coverage | ❌ غير مطبق | عالية |
-| Load Testing (k6) | ❌ غير مطبق | متوسطة |
-| AWS Infrastructure (ECS، Aurora، ALB) | ❌ غير مطبق | عالية |
-| CI/CD Pipeline | ❌ غير مطبق | متوسطة |
-| Event-driven Cache Invalidation | ❌ غير مطبق | منخفضة |
-| ML-based Recommendations | ❌ غير مطبق | منخفضة |
-
-### 📝 ملاحظات مهمة
-
-1. **PgBouncer:** مطبق محلياً في docker-compose للتطوير، يحتاج إلى إعداد AWS RDS Proxy للإنتاج
-2. **CDN Caching:** الـ headers مطبقة، لكن تحتاج إلى إعداد CloudFront/Cloudflare فعلي
-3. **Rate Limiting:** مُفعّل بالكامل على جميع endpoints مع ThrottlerGuard
-4. **Logging:** حالياً Logger عادي من NestJS، ليس structured JSON logs
-5. **Unit Tests:** SlugGenerator utility مُغطّى بـ 14 test cases، بقية الـ services تحتاج تغطية
-
----
-
-## 🚀 خطة التطوير المستقبلية
-
-### Phase 1: الأمان والحماية (Security & Protection)
-- ✅ إضافة Redis لـ distributed rate limiting (حالياً in-memory)
-- ✅ JWT Authentication للـ CMS API
-- ✅ API Key validation
-- ✅ IP Whitelisting للـ CMS
-
-### Phase 2: المراقبة والجودة (Observability & Quality)
-- ✅ Structured logging مع Winston
-- ✅ Correlation IDs للـ tracing
-- ✅ Unit tests coverage (حالياً: SlugGenerator فقط)
-- ✅ E2E tests للـ critical flows
-- ✅ Load testing مع k6
-
-### Phase 3: البنية التحتية (Infrastructure)
-- ✅ Dockerfiles للإنتاج
-- ✅ Terraform/CloudFormation للـ AWS
-- ✅ CI/CD pipeline (GitHub Actions)
-- ✅ ECS Fargate + Aurora Serverless v2
-
-### Phase 4: التحسينات (Enhancements)
-- ✅ Queue system لـ async operations
-- ✅ Event-driven architecture
-- ✅ Advanced analytics
-- ✅ ML recommendations
-
----
-
-## 📦 الملفات المهمة
-
-| الملف | الوصف |
-|-------|-------|
-| `TECHNICAL_ARCHITECTURE_DOCUMENT.md` | المستند التقني الكامل |
-| `API_SPECIFICATION.md` | توثيق جميع الـ endpoints |
-| `docker-compose.yml` | PostgreSQL + PgBouncer setup |
-| `docker/init.sql` | Database schema + indices + triggers |
-
----
-
-## 🤝 المساهمة
-
-المشروع يتبع معايير:
-- Conventional Commits
-- ESLint + Prettier
-- TypeScript strict mode
-
----
-
-**النسخة:** 1.0.0  
-**المؤلف:** محمد تحبسم  
-**التاريخ:** فبراير 2026  
-**الحالة:** ✅ جاهز للإنتاج

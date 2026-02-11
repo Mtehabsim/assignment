@@ -24,6 +24,7 @@ export interface ICmsRepository {
   save(program: Program): Promise<Program>;
   softDelete(id: string): Promise<void>;
   findBySlug(slug: string): Promise<Program | null>;
+  findLatestSlugPattern(baseSlug: string): Promise<string | null>;
 }
 
 /**

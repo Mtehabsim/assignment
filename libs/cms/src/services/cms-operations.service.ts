@@ -12,13 +12,12 @@ import {
   ICmsOperations,
   IExternalProviderService,
   ICmsRepository,
-  UpdateProgramDto,
   ICacheService,
   CacheKeyBuilder,
   SearchResult,
   SlugGenerator,
 } from "@app/core";
-
+import { CmsUpdateProgramDto } from '../dto/update-program.dto';
 @Injectable()
 export class CmsOperationsService implements ICmsOperations {
   constructor(
@@ -44,14 +43,13 @@ export class CmsOperationsService implements ICmsOperations {
       provider,
       externalId,
     );
-    if (existing) {
-      return existing;
-    }
+    if (existing) return existing;
 
     const details = await this.externalProviderService.fetchDetails(
       provider,
       externalId,
     );
+
     const uniqueSlug = await this.ensureUniqueSlug(details.title);
 
     const program = this.cmsRepository.create({
@@ -84,25 +82,27 @@ export class CmsOperationsService implements ICmsOperations {
   }
 
   async updateProgram(
-    id: string,
-    updateDto: UpdateProgramDto,
-  ): Promise<Program> {
-    const program = await this.getEditorView(id);
-    Object.assign(program, updateDto);
-    program.updated_at = new Date();
+  id: string,
+  updateDto: CmsUpdateProgramDto,
+): Promise<Program> {
+  const program = await this.getEditorView(id);
 
-    // Use transaction to ensure atomicity
-    const result = await this.cmsRepository.save(program);
+  if (updateDto.title) program.title = updateDto.title;
+  if (updateDto.description) program.description = updateDto.description;
+  if (updateDto.duration_seconds !== undefined) program.duration_seconds = updateDto.duration_seconds;
+  if (updateDto.language) program.language = updateDto.language;
+  if (updateDto.source_metadata) program.source_metadata = updateDto.source_metadata;
+  if (updateDto.category) program.category = updateDto.category;
+  if (updateDto.thumbnail_url) program.thumbnail_url = updateDto.thumbnail_url;
 
-    // Invalidate cache after successful save
-    this.invalidateProgramCache(program);
-    return result;
-  }
+  const result = await this.cmsRepository.save(program);
+  this.invalidateProgramCache(program);
+  return result;
+}
 
   async publishProgram(id: string): Promise<Program> {
     const program = await this.getEditorView(id);
 
-    // Ensure program is in valid state for publishing
     if (!program.title || !program.slug) {
       throw new BadRequestException(
         "Program must have title and slug before publishing",
@@ -111,23 +111,15 @@ export class CmsOperationsService implements ICmsOperations {
 
     program.status = ProgramStatus.PUBLISHED;
     program.published_at = new Date();
-    program.updated_at = new Date();
 
-    // Use transaction to ensure atomicity
     const result = await this.cmsRepository.save(program);
-
-    // Invalidate cache after successful save
     this.invalidateProgramCache(program);
     return result;
   }
 
   async archiveProgram(id: string): Promise<void> {
     const program = await this.getEditorView(id);
-
-    // Use transaction to ensure atomicity
     await this.cmsRepository.softDelete(id);
-
-    // Invalidate cache after successful delete
     this.invalidateProgramCache(program);
   }
 
@@ -141,16 +133,24 @@ export class CmsOperationsService implements ICmsOperations {
     }
   }
 
+
   private async ensureUniqueSlug(title: string): Promise<string> {
     const baseSlug = SlugGenerator.generate(title);
-    let slug = baseSlug;
-    let counter = 1;
 
-    while (await this.cmsRepository.findBySlug(slug)) {
-      slug = `${baseSlug}-${counter}`;
-      counter++;
+    // Check if the clean slug exists
+    const exactMatch = await this.cmsRepository.findBySlug(baseSlug);
+    if (!exactMatch) return baseSlug;
+
+    // Efficiently find the highest numbered suffix
+    const latestSlug = await this.cmsRepository.findLatestSlugPattern(baseSlug);
+
+    if (latestSlug) {
+      // Extract number from end of string (e.g. "video-5" -> 5)
+      const match = latestSlug.match(/-(\d+)$/);
+      const number = match ? parseInt(match[1], 10) + 1 : 1;
+      return `${baseSlug}-${number}`;
     }
 
-    return slug;
+    return `${baseSlug}-1`;
   }
 }

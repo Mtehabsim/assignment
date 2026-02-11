@@ -1,6 +1,6 @@
-import { Injectable, NotFoundException, Logger } from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Repository, IsNull, SelectQueryBuilder } from "typeorm";
+import { Repository, IsNull } from "typeorm";
 import { Program } from "../entities/program.entity";
 import {
   IProgramsRepository,
@@ -9,26 +9,23 @@ import {
 } from "../interfaces/programs.repository.interface";
 import { ProgramStatus, Language, Provider } from "../enums/program.enums";
 import { ProgramQueryBuilder } from "../query-builders";
+import { BaseProgramsRepository } from "./base-programs.repository";
 
 /**
  * Unified Repository Implementation
- * Implements both ICmsRepository (write) and IDiscoveryRepository (read)
- * Dependency Inversion: Abstracts TypeORM implementation details from business logic
- * Allows for easy testing and switching database implementations
+ * Extends BaseProgramsRepository to inherit shared logic (slugs, generic finds)
  */
 @Injectable()
 export class ProgramsRepository
+  extends BaseProgramsRepository
   implements IProgramsRepository, ICmsRepository, IDiscoveryRepository
 {
-  private readonly logger = new Logger(ProgramsRepository.name);
 
   constructor(
     @InjectRepository(Program)
-    private typeOrmRepository: Repository<Program>,
-  ) {}
-
-  async findById(id: string): Promise<Program | null> {
-    return this.typeOrmRepository.findOne({ where: { id } });
+    typeOrmRepository: Repository<Program>, 
+  ) {
+    super(typeOrmRepository);
   }
 
   async findByExternalId(
@@ -63,7 +60,7 @@ export class ProgramsRepository
   }
 
   async softDelete(id: string): Promise<void> {
-    const program = await this.findById(id);
+    const program = await this.findById(id); // Uses inherited findById
     if (!program) {
       throw new NotFoundException("Program not found");
     }
@@ -108,7 +105,6 @@ export class ProgramsRepository
   ): Promise<{ data: Program[]; total: number }> {
     let query = this.typeOrmRepository.createQueryBuilder("p");
 
-    // Apply filters and sorting using QueryBuilder
     query = ProgramQueryBuilder.applyPublishedFilters(query, lang, status);
     query = ProgramQueryBuilder.applySorting(query, sort);
 
@@ -138,9 +134,5 @@ export class ProgramsRepository
     );
 
     return query.take(limit).getMany();
-  }
-
-  async findBySlug(slug: string): Promise<Program | null> {
-    return this.typeOrmRepository.findOne({ where: { slug } });
   }
 }

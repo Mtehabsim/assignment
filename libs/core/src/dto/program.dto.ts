@@ -1,11 +1,8 @@
-import { IsString, IsOptional, IsEnum, IsNumber } from 'class-validator';
+import { IsString, IsOptional, IsEnum, IsNumber, IsObject } from 'class-validator';
 import { Language } from '../enums/program.enums';
 
 /**
- * Core DTOs - Only foundation types
- * Business-specific DTOs are in their respective libraries:
- * - CMS DTOs: libs/cms/src/dto/
- * - Discovery DTOs: libs/discovery/src/dto/
+ * Core DTOs - Foundation types
  */
 
 export class CreateProgramDto {
@@ -25,6 +22,7 @@ export class CreateProgramDto {
   language?: Language;
 
   @IsOptional()
+  @IsObject()
   source_metadata?: Record<string, any>;
 }
 
@@ -46,5 +44,6 @@ export class UpdateProgramDto {
   language?: Language;
 
   @IsOptional()
+  @IsObject()
   source_metadata?: Record<string, any>;
 }

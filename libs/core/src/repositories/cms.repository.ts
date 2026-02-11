@@ -1,6 +1,5 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
-import { InjectRepository } from "@nestjs/typeorm";
-import { Repository, IsNull } from "typeorm";
+import { IsNull } from "typeorm";
 import { Program } from "../entities/program.entity";
 import { ICmsRepository } from "../interfaces/programs.repository.interface";
 import { ProgramStatus } from "../enums/program.enums";

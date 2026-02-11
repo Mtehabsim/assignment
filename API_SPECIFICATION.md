@@ -32,7 +32,7 @@ GET /admin/programs/health
 
 ### 1. Search External Providers
 
-Search YouTube/Vimeo for programs to import.
+Search YouTube/others for programs to import.
 
 ```
 POST /admin/programs/integrations/search
