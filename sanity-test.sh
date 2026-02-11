@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ################################################################################
-# E2E Test Script for Programs API (No JQ Version)
+# E2E Test Script for Programs API 
 # Uses standard grep/sed for JSON parsing to avoid dependencies.
 ################################################################################
 
@@ -435,7 +435,7 @@ print_summary() {
 ################################################################################
 
 main() {
-    print_header "🚀 Starting E2E Test Suite (No JQ)"
+    print_header "🚀 Starting E2E Test Suite"
     check_prerequisites
     
     test_external_search || exit 1

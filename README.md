@@ -174,7 +174,7 @@ cp .env.example .env
 للتكامل الكامل مع YouTube، أضف:
 ```
 YOUTUBE_API_KEY=your_api_key_here
-YOUTUBE_CHANNEL_ID=UCF2JlBUzfP2lqhI0P-vFEKA
+YOUTUBE_CHANNEL_ID=UCwjLh640nGXSGa9iHRS31ag
 ```
 
 ---

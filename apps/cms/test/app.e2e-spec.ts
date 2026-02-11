@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
-import * as request from 'supertest';
+import request from 'supertest';
 import { CmsModule } from './../src/cms.module';
 
 describe('CmsController (e2e)', () => {
@@ -15,10 +15,12 @@ describe('CmsController (e2e)', () => {
     await app.init();
   });
 
-  it('/ (GET)', () => {
-    return request(app.getHttpServer())
-      .get('/')
-      .expect(200)
-      .expect('Hello World!');
-  });
+  it('/admin/programs/health (GET)', () => {
+  return request(app.getHttpServer())
+    .get('/admin/programs/health') //
+    .expect(200)
+    .expect((res) => {
+      expect(res.body.status).toBe('ok'); 
+    });
+});
 });
